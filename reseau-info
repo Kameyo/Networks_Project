@@ -1,0 +1,117 @@
+lancement automatique demarage
+
+
+chmod +x /etc/init.d/mon_service
+update-rc.d mon_service defaults 80
+
+============================================= 
+											resolv.conf
+domain imss.org           
+search imss.org           
+nameserver 192.168.1.254
+nameserver 192.168.1.253
+
+============================================= 
+											monservice
+#!/bin/bash
+ifconfig eth0 up 192.168.1.1
+
+dhcp -d
+
+============================================= DHCP.conf
+
+ddns-update-style none;
+default-lease-time 600;
+max-lease-time 7200;
+authoritative;
+
+log-facility local7;
+
+option domain-name "imss.org";
+option domain-name-servers 192.168.1.254, 192.168.1.253;
+
+subnet 192.168.1.0 netmask 255.255.255.0 {
+	range 192.168.1.10 192.168.1.250;
+}
+
+
+
+============================================= DNS primary
+											name.conf
+zone "imss.org" {
+	type master;
+	file "/etc/bind/db.imss.org";
+	allow-transfer { 192.168.1.253; };
+};
+
+zone "1.168.192.in-addr.arpa" {
+	type master;
+	file "/etc/bind/db.imss.org.rev";
+	allow-transfer { 192.168.1.253; };
+};
+
+											db.imss.org
+											
+cp /etc/bind/db.empty /etc/bind/db.imss.org
+
+2016041901
+
+Cache TTL 
+@	IN	NS	ns1.imss.org.
+@	IN	NS	ns2.imss.org.
+
+ns1	IN	A	192.168.1.254
+ns2	IN	A	192.168.1.253
+dhcp	IN	A	192.168.1.1	
+
+											db.imss.org.rev
+											
+cp /etc/bind/db.empty /etc/bind/db.imss.org.rev
+
+2016041901
+
+Cache TTL 
+@	IN	NS	ns1.imss.org.
+@	IN	NS	ns2.imss.org.
+
+254	IN	PTR	ns1.imss.org
+253	IN	PTR	ns2.imss.org
+1	IN	PTR	dhcp.imss.org
+
+											monservice
+#!/bin/bash
+ifconfig eth0 up 192.168.1.254
+/etc/init.d/bind9 start
+
+============================================= DNS slave
+
+											monservice
+#!/bin/bash
+ifconfig eth0 up 192.168.1.253
+/etc/init.d/bind9 start
+
+											name.conf
+zone "imss.org" {
+	type slave;
+	file "/etc/bind/db.imss.org";
+	masters { 192.168.1.254; };
+};
+
+zone "1.168.192.in-addr.arpa" {
+	type slave;
+	file "/etc/bind/db.imss.org.rev";
+	masters { 192.168.1.254; };
+};
+
+chmod g+w /etc/bind
+
+/etc/init.d/bind9 start
+
+============================================= ADM 
+mon_service
+#!/bin/bash
+ifup eth0
+
+dans /etc/network/interface
+ajouter : iface eth0 inet dhcp
+

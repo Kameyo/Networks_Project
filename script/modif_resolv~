@@ -1,0 +1,35 @@
+
+
+
+
+#!/usr/bin/perl
+
+open (my $file , " +> ", "/etc/resolv.conf");
+print( $file "domain imss.org\n");
+print( $file "search imss.org\n");
+print( $file "nameserver 192.168.1.254\n");
+print( $file "nameserver 192.168.1.253\n");
+close ( $file );
+
+open (my $file , " +> ", "/etc/init.d/mon_service");
+print( $file "#!/bin/bash");
+print( $file "ifup eth0");
+close ( $file );
+
+chmod +x /etc/init.d/mon_service
+update-rc.d mon_service defaults 80
+my $encore = false;
+
+open ( my $file , " +< ","/etc/network/interface");
+while ( defined ( $l = <$fd> ) ) {
+        chomp $l;
+        if ( $l == "iface eth0 inet dhcp" ){
+        encore = true;
+        }
+}
+if(!encore)
+{
+        print( $file , "\niface eth0 inet dhcp\n" );
+}
+close ( $file );
+

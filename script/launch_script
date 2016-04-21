@@ -1,0 +1,50 @@
+#!/usr/bin/perl
+use Expect;
+if(!("$ARGV[0]")){
+        printf("Veuillez saisir une adresse ip en argument\n");
+}else{
+        printf("copy : lancement du script \n");
+        system("scp", "root@192.168.1.5:/tmp", "ajout.pl");
+        system("ssh", "root:root@192.168.1.5:/tmp", "ajout.pl");
+}
+
+
+#!/usr/bin/perl
+use Net::SSH::Expect
+
+if(!("$ARGV[0]"))
+        printf("Veuillez saisir une adresse ip en argument\n");
+}else{
+        printf("copy : lancement du script \n");
+        my $ssh = Net::SSH::Expect->new (
+                host => "$ARGV[0]",
+                user => 'root',
+                raw_pty => 1 
+        );
+        $ssh->exec(/tmp/ajout);
+}
+if(!("$ARGV[0]")){
+        printf("Veuillez saisir une adresse ip en argument\n");
+}else{
+        printf("copy : lancement du script \n");
+        system("scp", "root@192.168.1.16:/tmp", "ajout.pl");
+        my $ssh = Net::SSH::Expect->new (
+                host => "$ARGV[0]",
+                user => 'root',
+                raw_pty => 1
+        );
+        $ssh->exec(/tmp/ajout);
+}
+
+====================================== version ok =============================
+#!/usr/bin/perl
+
+if(!("$ARGV[0]")){
+        printf("Veuillez saisir une adresse ip en argument\n");
+}else{
+        printf("copy : lancement du script \n");
+        $target = "root@"."$ARGV[0]";
+        system("scp configureHost.pl ".$target.":/tmp");
+        system("ssh", "$target", "perl /tmp/configureHost.pl");
+}
+
